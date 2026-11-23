@@ -1,0 +1,14 @@
+{
+  "name": "hr-leave-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:migrate": "wrangler d1 migrations apply hr-leave-tracker --remote",
+    "seed": "python3 scripts/seed_from_xlsx.py"
+  },
+  "devDependencies": {
+    "wrangler": "4.167.0"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "hr-leave-tracker",
+  "main": "src/worker.js",
+  "build": { "command": "node scripts/build-assets.mjs", "watch_dir": "public" },
+  "compatibility_date": "2026-11-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hr-leave-tracker",
+      "database_id": "6d9d1aba-5e1c-4ba5-a0f6-aa5b24b103a0",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "observability": { "enabled": true }
+}
