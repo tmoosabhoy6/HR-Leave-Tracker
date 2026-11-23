@@ -1,7 +1,7 @@
-"""Build seed SQL (staff list + admin password) from the payroll spreadsheet.
+"""Build seed SQL (staff list) from the payroll spreadsheet.
 
 Usage:
-    python3 scripts/seed_from_xlsx.py <payroll.xlsx> [admin-password]
+    python3 scripts/seed_from_xlsx.py <payroll.xlsx>
 
 Writes seed/seed.sql (git-ignored: it holds staff names and IDs). Apply it with:
     npx wrangler d1 execute hr-leave-tracker --remote --file seed/seed.sql
@@ -9,9 +9,7 @@ Writes seed/seed.sql (git-ignored: it holds staff names and IDs). Apply it with:
 The sheet needs a header row containing "HR Name", "ITS Id/Login Id", "Office Name" and "Currency".
 """
 
-import hashlib
 import os
-import secrets
 import sys
 
 import openpyxl
@@ -27,7 +25,6 @@ def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__)
     path = sys.argv[1]
-    password = sys.argv[2] if len(sys.argv) > 2 else secrets.token_urlsafe(9)
 
     ws = openpyxl.load_workbook(path, data_only=True).active
     rows = list(ws.iter_rows(values_only=True))
@@ -50,22 +47,10 @@ def main():
         )
         count += 1
 
-    salt = secrets.token_hex(16)
-    digest = hashlib.pbkdf2_hmac("sha256", password.encode(), bytes.fromhex(salt), 100000).hex()
-    out.append(
-        "INSERT INTO settings (key, value) VALUES ('admin_password', '{{\"salt\":\"{}\",\"hash\":\"{}\"}}') "
-        "ON CONFLICT(key) DO UPDATE SET value = excluded.value;".format(salt, digest)
-    )
-    out.append(
-        "INSERT INTO settings (key, value) VALUES ('session_secret', '\"{}\"') "
-        "ON CONFLICT(key) DO UPDATE SET value = excluded.value;".format(secrets.token_hex(32))
-    )
-
     os.makedirs("seed", exist_ok=True)
     with open("seed/seed.sql", "w") as f:
         f.write("\n".join(out) + "\n")
     print(f"Wrote seed/seed.sql with {count} staff.")
-    print(f"Admin password: {password}")
 
 
 if __name__ == "__main__":

@@ -5,11 +5,6 @@ const json = (data, status = 200, headers = {}) =>
   new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store', ...headers } });
 const bad = (msg, status = 400) => json({ error: msg }, status);
 
-const enc = new TextEncoder();
-const b64u = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-const hex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
-const randomHex = (n) => hex(crypto.getRandomValues(new Uint8Array(n)));
-
 async function getSetting(env, key) {
   const row = await env.DB.prepare('SELECT value FROM settings WHERE key = ?').bind(key).first();
   return row ? JSON.parse(row.value) : null;
@@ -20,43 +15,6 @@ async function putSetting(env, key, value) {
     .run();
 }
 const getPolicy = async (env) => mergePolicy(await getSetting(env, 'policy'));
-
-// ---------- auth ----------
-async function hashPassword(password, saltHex) {
-  const key = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const salt = Uint8Array.from(saltHex.match(/../g).map((h) => parseInt(h, 16)));
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 100000 }, key, 256);
-  return hex(bits);
-}
-async function sessionKey(env) {
-  let secret = await getSetting(env, 'session_secret');
-  if (!secret) {
-    secret = randomHex(32);
-    await putSetting(env, 'session_secret', secret);
-  }
-  return crypto.subtle.importKey('raw', enc.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
-}
-async function makeToken(env) {
-  const payload = b64u(enc.encode(JSON.stringify({ exp: Date.now() + 30 * 86400000 })));
-  const sig = b64u(await crypto.subtle.sign('HMAC', await sessionKey(env), enc.encode(payload)));
-  return `${payload}.${sig}`;
-}
-async function isAuthed(request, env) {
-  const cookie = request.headers.get('cookie') || '';
-  const m = cookie.match(/(?:^|;\s*)ld_session=([^;]+)/);
-  if (!m) return false;
-  const [payload, sig] = m[1].split('.');
-  if (!payload || !sig) return false;
-  const expect = b64u(await crypto.subtle.sign('HMAC', await sessionKey(env), enc.encode(payload)));
-  if (expect !== sig) return false;
-  try {
-    const { exp } = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-    return exp > Date.now();
-  } catch {
-    return false;
-  }
-}
-const cookieHeader = (value, maxAge) => `ld_session=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
 
 // ---------- helpers ----------
 function newRef() {
@@ -128,21 +86,6 @@ async function publicApi(request, env, path) {
 async function adminApi(request, env, path) {
   const method = request.method;
 
-  if (path === '/api/login' && method === 'POST') {
-    const { password } = await body(request);
-    const stored = await getSetting(env, 'admin_password');
-    if (!stored) return bad('No admin password is set yet.', 500);
-    const ok = typeof password === 'string' && (await hashPassword(password, stored.salt)) === stored.hash;
-    if (!ok) {
-      await new Promise((r) => setTimeout(r, 600));
-      return bad('That password is not right.', 401);
-    }
-    return json({ ok: true }, 200, { 'set-cookie': cookieHeader(await makeToken(env), 30 * 86400) });
-  }
-  if (path === '/api/logout' && method === 'POST') return json({ ok: true }, 200, { 'set-cookie': cookieHeader('', 0) });
-
-  if (!(await isAuthed(request, env))) return bad('Sign in to continue.', 401);
-
   if (path === '/api/data' && method === 'GET') {
     const [emps, reqs, policy] = await Promise.all([
       env.DB.prepare('SELECT * FROM employees ORDER BY name COLLATE NOCASE').all(),
@@ -168,17 +111,6 @@ async function adminApi(request, env, path) {
     p.confirmed = true;
     await putSetting(env, 'policy', p);
     return json({ policy: p });
-  }
-
-  if (path === '/api/password' && method === 'POST') {
-    const { current, next } = await body(request);
-    const stored = await getSetting(env, 'admin_password');
-    if (!stored || (await hashPassword(String(current || ''), stored.salt)) !== stored.hash) return bad('The current password is not right.', 400);
-    if (typeof next !== 'string' || next.length < 8) return bad('Use at least 8 characters for the new password.');
-    const salt = randomHex(16);
-    await putSetting(env, 'admin_password', { salt, hash: await hashPassword(next, salt) });
-    await putSetting(env, 'session_secret', randomHex(32)); // sign everyone else out
-    return json({ ok: true }, 200, { 'set-cookie': cookieHeader(await makeToken(env), 30 * 86400) });
   }
 
   if (path === '/api/requests' && method === 'POST') {

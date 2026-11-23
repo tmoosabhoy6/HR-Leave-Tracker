@@ -37,7 +37,6 @@ const ICONS = {
   download: 'M12 4v11M7 10l5 5 5-5M5 20h14',
   link: 'M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1',
   edit: 'M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4',
-  logout: 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l4-4-4-4M14 12H4',
 };
 const Icon = ({ name, label }) =>
   html`<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden=${label ? undefined : 'true'} role=${label ? 'img' : undefined} aria-label=${label}><path d=${ICONS[name]} /></svg>`;
@@ -147,42 +146,8 @@ function useRoute() {
 }
 const go = (path) => (location.hash = '#/' + path);
 
-// ---------------------------------------------------------------- login
-function Login({ onDone }) {
-  const [pw, setPw] = useState('');
-  const [err, setErr] = useState('');
-  const [busy, setBusy] = useState(false);
-  const submit = async (e) => {
-    e.preventDefault();
-    setBusy(true);
-    setErr('');
-    try {
-      await api('/api/login', { method: 'POST', body: { password: pw } });
-      onDone();
-    } catch (x) {
-      setErr(x.message);
-      setBusy(false);
-    }
-  };
-  return html`<main class="login">
-    <form class="login-card panel" onSubmit=${submit}>
-      <img src="/icon.svg" alt="" width="40" height="40" />
-      <h1 class="serif">Leave desk</h1>
-      <p class="muted">Review and approve leave for HR staff.</p>
-      <div class="field">
-        <label for="pw">Admin password</label>
-        <input id="pw" class="input" type="password" autocomplete="current-password" value=${pw} onInput=${(e) => setPw(e.target.value)} autofocus required />
-      </div>
-      ${err && html`<p class="form-error" role="alert">${err}</p>`}
-      <button class="btn primary block" disabled=${busy}>${busy ? 'Signing in…' : 'Sign in'}</button>
-      <a class="small-link" href="/apply">Looking for the leave form?</a>
-    </form>
-  </main>`;
-}
-
 // ---------------------------------------------------------------- app shell
 function App() {
-  const [authed, setAuthed] = useState(null);
   const [data, setData] = useState(null);
   const [toast, showToast] = useToast();
   const [dialog, setDialog] = useState(null);
@@ -192,10 +157,8 @@ function App() {
     try {
       const d = await api('/api/data');
       setData(d);
-      setAuthed(true);
     } catch (e) {
-      if (e.status === 401) setAuthed(false);
-      else showToast(e.message);
+      showToast(e.message);
     }
   }, []);
   useEffect(() => {
@@ -208,7 +171,6 @@ function App() {
     };
   }, []);
 
-  if (authed === false) return html`<${Login} onDone=${load} />`;
   if (!data) return html`<p class="boot">Loading…</p>`;
 
   const ctx = {
@@ -815,8 +777,6 @@ function NumberField({ id, label, value, onChange, optional }) {
 function SettingsView({ ctx }) {
   const [p, setP] = useState(() => structuredClone(ctx.policy));
   const [busy, setBusy] = useState(false);
-  const [pw, setPw] = useState({ current: '', next: '' });
-  const [pwMsg, setPwMsg] = useState('');
   const dirty = JSON.stringify(p) !== JSON.stringify(ctx.policy);
   const counts = { iraqi: ctx.employees.filter((e) => e.active && groupOf(e) === 'iraqi').length, foreign: ctx.employees.filter((e) => e.active && groupOf(e) === 'foreign').length };
   const setG = (g, k) => (v) => setP({ ...p, [g]: { ...p[g], [k]: v } });
@@ -832,17 +792,6 @@ function SettingsView({ ctx }) {
     }
     setBusy(false);
   };
-  const changePw = async (e) => {
-    e.preventDefault();
-    try {
-      await api('/api/password', { method: 'POST', body: pw });
-      setPw({ current: '', next: '' });
-      setPwMsg('Password changed. Other devices have been signed out.');
-    } catch (x) {
-      setPwMsg(x.message);
-    }
-  };
-
   return html`<div class="page settings">
     <div class="page-head"><h1 class="serif page-title">Settings</h1></div>
 
@@ -894,16 +843,6 @@ function SettingsView({ ctx }) {
       <p><a class="btn" href="/api/export.csv"><${Icon} name="download" />Download CSV</a></p>
     </section>
 
-    <section class="panel block-pad">
-      <h2 class="block-title">Admin password</h2>
-      <form class="pw-form" onSubmit=${changePw}>
-        <div class="field"><label for="pw-c">Current password</label><input id="pw-c" class="input" type="password" autocomplete="current-password" value=${pw.current} onInput=${(e) => setPw({ ...pw, current: e.target.value })} required /></div>
-        <div class="field"><label for="pw-n">New password</label><input id="pw-n" class="input" type="password" autocomplete="new-password" minlength="8" value=${pw.next} onInput=${(e) => setPw({ ...pw, next: e.target.value })} required /></div>
-        <button class="btn">Change password</button>
-      </form>
-      ${pwMsg && html`<p class="hint" role="status">${pwMsg}</p>`}
-      <p><button class="btn ghost small" onClick=${async () => { await api('/api/logout', { method: 'POST' }); location.reload(); }}><${Icon} name="logout" />Sign out</button></p>
-    </section>
   </div>`;
 }
 

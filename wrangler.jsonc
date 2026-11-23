@@ -1,6 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "hr-leave-tracker",
+  "account_id": "e0b516abfa79fbc38f42dfce604cfdf1",
   "main": "src/worker.js",
   "build": { "command": "node scripts/build-assets.mjs", "watch_dir": "public" },
   "compatibility_date": "2026-11-01",
