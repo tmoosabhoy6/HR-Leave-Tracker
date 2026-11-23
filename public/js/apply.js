@@ -13,6 +13,7 @@ const T = {
     noMatch: 'No one with that name. Check the spelling, or ask the office to add you.',
     change: 'Change',
     type: 'Type of leave',
+    typeLabel: 'Type of leave',
     types: {
       monthly: ['Monthly day off', 'Your regular days off this month'],
       annual: ['Annual leave', 'Longer leave, taken from your yearly allowance'],
@@ -54,65 +55,70 @@ const T = {
     errRef: 'Enter the 6-character code.',
     fridays: 'Fridays are not counted.',
     days: (n) => (n === 1 ? '1 day' : `${n} days`),
-    lang: 'العربية',
+    errNotFound: 'No request has that reference. Check the code and try again.',
+    errServer: 'Something went wrong. Try again in a moment.',
+    langLabel: 'Language',
     loading: 'Loading names…',
     of: (name) => `Request for ${name}`,
   },
+  // Iraqi Arabic (عراقي)
   ar: {
     title: 'طلب إجازة',
-    intro: 'اطلب إجازة. يُرسَل طلبك إلى مكتب الموارد البشرية للموافقة عليه.',
+    intro: 'اطلب إجازتك من هنا. طلبك يروح لمكتب الموارد البشرية حتى يوافقون عليه.',
     tabNew: 'طلب جديد',
-    tabCheck: 'متابعة طلب',
+    tabCheck: 'شوف طلبك',
     name: 'اسمك',
-    namePh: 'ابدأ بكتابة اسمك بالإنجليزية',
-    nameHint: 'اسمك غير موجود؟ اطلب من المكتب إضافتك.',
-    noMatch: 'لا يوجد أحد بهذا الاسم. تحقّق من الكتابة أو اطلب من المكتب إضافتك.',
-    change: 'تغيير',
-    type: 'نوع الإجازة',
+    namePh: 'اكتب اسمك بالإنگليزي',
+    nameHint: 'اسمك مو موجود؟ گول للمكتب حتى يضيفوك.',
+    noMatch: 'ماكو أحد بهالاسم. تأكد من الكتابة، أو گول للمكتب حتى يضيفوك.',
+    change: 'غيّر',
+    type: 'شنو نوع الإجازة؟',
+    typeLabel: 'نوع الإجازة',
     types: {
-      monthly: ['إجازة شهرية', 'أيام عطلتك المعتادة لهذا الشهر'],
-      annual: ['إجازة سنوية', 'إجازة أطول تُحتسب من رصيدك السنوي'],
-      sick: ['إجازة مرضية', 'في حال المرض'],
-      other: ['أخرى / طارئة', 'ظرف عائلي طارئ أو غير ذلك'],
+      monthly: ['إجازة شهرية', 'أيام عطلتك الاعتيادية بهالشهر'],
+      annual: ['إجازة سنوية', 'إجازة أطول، تنحسب من رصيدك السنوي'],
+      sick: ['إجازة مرضية', 'إذا تعبان أو مريض'],
+      other: ['شي ثاني / طارئ', 'ظرف عائلي طارئ أو أي شي ثاني'],
     },
     dates: 'التواريخ',
     from: 'أول يوم إجازة',
     to: 'آخر يوم إجازة',
     reason: 'السبب',
-    optional: 'اختياري',
-    reasonPh: 'ملاحظة قصيرة للمكتب',
-    phone: 'رقم الهاتف',
-    send: 'إرسال الطلب',
-    sending: 'جارٍ الإرسال…',
-    sentTitle: 'تم إرسال الطلب',
-    sentBody: 'سيراجع المكتب طلبك. احتفظ بهذا الرمز لمعرفة ما إذا تمت الموافقة على إجازتك.',
-    yourRef: 'رمز المرجع',
-    checkNow: 'متابعة هذا الطلب',
-    another: 'إرسال طلب آخر',
-    checkIntro: 'أدخل رمز المرجع الذي حصلت عليه بعد إرسال طلبك.',
-    refLabel: 'رمز المرجع',
-    check: 'تحقّق',
-    checking: 'جارٍ التحقّق…',
-    status: { pending: 'قيد المراجعة', approved: 'تمت الموافقة', declined: 'مرفوض', cancelled: 'ملغى' },
+    optional: 'مو ضروري',
+    reasonPh: 'اكتب ملاحظة صغيرة للمكتب',
+    phone: 'رقم موبايلك',
+    send: 'دز الطلب',
+    sending: 'لحظة، دا ينرسل…',
+    sentTitle: 'انرسل طلبك',
+    sentBody: 'المكتب راح يشوف طلبك. احتفظ بهذا الرمز حتى تعرف إذا وافقوا على إجازتك.',
+    yourRef: 'رمز الطلب',
+    checkNow: 'شوف هذا الطلب',
+    another: 'دز طلب ثاني',
+    checkIntro: 'اكتب رمز الطلب اللي طلعلك بعد ما دزيت الطلب.',
+    refLabel: 'رمز الطلب',
+    check: 'شوف',
+    checking: 'لحظة…',
+    status: { pending: 'بالانتظار', approved: 'وافقوا عليها', declined: 'ما وافقوا', cancelled: 'ملغية' },
     statusBody: {
-      pending: 'لم يتخذ المكتب قرارًا بعد. تحقّق مرة أخرى لاحقًا.',
-      approved: 'تمت الموافقة على إجازتك.',
-      declined: 'لم تتم الموافقة على هذا الطلب. راجع المكتب إذا كانت لديك أسئلة.',
-      cancelled: 'ألغى المكتب هذه الإجازة.',
+      pending: 'المكتب بعده ما قرر. ارجع شوف بعدين.',
+      approved: 'إجازتك صارت موافق عليها.',
+      declined: 'طلبك ما انوافق عليه. إذا عندك سؤال راجع المكتب.',
+      cancelled: 'المكتب لغى هاي الإجازة.',
     },
     officeNote: 'ملاحظة من المكتب',
-    errName: 'اختر اسمك من القائمة.',
-    errType: 'اختر نوع الإجازة.',
-    errDates: 'اختر أول وآخر يوم إجازة.',
-    errOrder: 'آخر يوم يسبق أول يوم.',
-    errNone: 'لا توجد أيام عمل في هذه التواريخ.',
-    errNet: 'تعذّر الإرسال. تحقّق من اتصال الإنترنت وحاول مرة أخرى.',
-    errRef: 'أدخل الرمز المكوّن من 6 أحرف.',
-    fridays: 'لا تُحتسب أيام الجمعة.',
-    days: (n) => (n === 1 ? 'يوم واحد' : n === 2 ? 'يومان' : n <= 10 ? `${n} أيام` : `${n} يومًا`),
-    lang: 'English',
-    loading: 'جارٍ تحميل الأسماء…',
-    of: (name) => `طلب باسم ${name}`,
+    errName: 'اختار اسمك من القائمة.',
+    errType: 'اختار نوع الإجازة.',
+    errDates: 'اختار أول يوم وآخر يوم من إجازتك.',
+    errOrder: 'آخر يوم صاير قبل أول يوم.',
+    errNone: 'هالتواريخ ما بيها أيام دوام.',
+    errNet: 'ما انرسل. تأكد من الإنترنت وجرب مرة ثانية.',
+    errRef: 'اكتب الرمز، ست حروف.',
+    errNotFound: 'ماكو طلب بهالرمز. تأكد منه وجرب مرة ثانية.',
+    errServer: 'صار خطأ. جرب مرة ثانية بعد شوية.',
+    fridays: 'أيام الجمعة ما تنحسب.',
+    days: (n) => (n === 1 ? 'يوم واحد' : n === 2 ? 'يومين' : n <= 10 ? `${n} أيام` : `${n} يوم`),
+    loading: 'دا تتحمل الأسماء…',
+    langLabel: 'اللغة',
   },
 };
 
@@ -204,12 +210,15 @@ function NewRequest({ t, lang, staff, countFridays, onSent }) {
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
   const [serverErr, setServerErr] = useState('');
-  const set = (k, v) =>
+  const ERR_KEY = { employeeId: 'name', type: 'type', start: 'dates', end: 'dates' };
+  const set = (k, v) => {
+    if (ERR_KEY[k]) setErrors((e) => (e[ERR_KEY[k]] ? { ...e, [ERR_KEY[k]]: undefined } : e));
     setF((p) => {
       const n = { ...p, [k]: v };
       if (k === 'start' && v && (!p.end || p.end < v)) n.end = v;
       return n;
     });
+  };
   const policy = { countFridays };
   const days = isISODate(f.start) && isISODate(f.end) && f.end >= f.start ? countDays(f.start, f.end, policy) : 0;
 
@@ -231,7 +240,7 @@ function NewRequest({ t, lang, staff, countFridays, onSent }) {
     try {
       const res = await fetch('/api/public/requests', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(f) });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || t.errNet);
+      if (!res.ok) throw new Error(lang === 'ar' ? t.errServer : data.error || t.errServer);
       const p = staff.find((x) => x.id === f.employeeId);
       onSent({ ref: data.ref, name: p?.name, type: f.type, start: f.start, end: f.end, days: data.days ?? days });
     } catch (x) {
@@ -297,7 +306,7 @@ function Sent({ t, lang, sent, onAnother, onCheck }) {
     </div>
     <dl class="summary">
       <div><dt>${t.name}</dt><dd>${sent.name}</dd></div>
-      <div><dt>${t.type}</dt><dd>${t.types[sent.type][0]}</dd></div>
+      <div><dt>${t.typeLabel}</dt><dd>${t.types[sent.type][0]}</dd></div>
       <div><dt>${t.dates}</dt><dd>${niceRange(sent.start, sent.end, lang)}${lang === 'ar' ? '، ' : ', '}${t.days(sent.days)}</dd></div>
     </dl>
     <div class="sent-actions">
@@ -324,7 +333,7 @@ function Check({ t, lang, initialRef }) {
     try {
       const r = await fetch(`/api/public/requests/${c}`);
       const data = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(data.error || t.errNet);
+      if (!r.ok) throw new Error(r.status === 404 ? t.errNotFound : lang === 'ar' ? t.errServer : data.error || t.errServer);
       setRes(data.request);
     } catch (x) {
       setErr(x.message === 'Failed to fetch' ? t.errNet : x.message);
@@ -346,7 +355,7 @@ function Check({ t, lang, initialRef }) {
       <p class="status-label">${t.status[res.status]}</p>
       <p>${t.statusBody[res.status]}</p>
       <dl class="summary">
-        <div><dt>${t.type}</dt><dd>${t.types[res.type][0]}</dd></div>
+        <div><dt>${t.typeLabel}</dt><dd>${t.types[res.type][0]}</dd></div>
         <div><dt>${t.dates}</dt><dd>${niceRange(res.start_date, res.end_date, lang)}</dd></div>
       </dl>
       ${res.decision_note && html`<p class="note"><b>${t.officeNote}:</b> ${res.decision_note}</p>`}
@@ -366,7 +375,7 @@ function App() {
   const t = T[lang];
 
   useEffect(() => {
-    document.documentElement.lang = lang;
+    document.documentElement.lang = lang === 'ar' ? 'ar-IQ' : 'en';
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
     document.title = t.title;
     store.set('leave-lang', lang);
@@ -385,7 +394,10 @@ function App() {
     <header class="hero">
       <div class="hero-top">
         <img src="/icon.svg" alt="" width="32" height="32" />
-        <button class="lang" onClick=${() => setLang(lang === 'en' ? 'ar' : 'en')} lang=${lang === 'en' ? 'ar' : 'en'}>${t.lang}</button>
+        <div class="lang-switch" role="group" aria-label=${t.langLabel}>
+          <button lang="en" dir="ltr" aria-pressed=${lang === 'en'} onClick=${() => setLang('en')}>English</button>
+          <button lang="ar" dir="rtl" aria-pressed=${lang === 'ar'} onClick=${() => setLang('ar')}>عربي</button>
+        </div>
       </div>
       <h1 class="serif">${t.title}</h1>
       <p>${t.intro}</p>
